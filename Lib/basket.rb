@@ -1,40 +1,47 @@
 class Basket
-  attr_accessor :basket
-  def initialize
-    @basket = { "FR1" => 0,
-                "SR1" => 0,
-                "CF1" => 0,
-    }
+  attr_reader :purchases
+
+  def initialize(catalogue)
+    # the class is called basket, lets think of a different descriptive name
+    @purchases = Hash.new
+    @catalogue = catalogue
+    @catalogue.products_by_code.each_key { |p_code| @purchases[p_code] = 0 }
   end
 
   def show_basket
-    return "#{@basket} costs: £#{basket_total}"
+    # #{@basket} will call to_s method of Basket
   end
 
-  def basket_total
-    ((@basket["FR1"] * 311) + (@basket["SR1"] * 500) + (@basket["CF1"] * 1123)) / 100.00
+  def total
+    running_total = 0
+    @purchases.each do |code, quantity|
+      running_total = running_total + quantity * @catalogue.products_by_code[code].price
+    end
+    return running_total
   end
 
-  def add(x)
-    @basket[x] = @basket[x] + 1
+  # give our parameter a descriptive name
+  def add(product_code)
+    # what if the user passes a non existant product code
+    if @purchases.key?(product_code)
+      @purchases[product_code] = @purchases[product_code] + 1
+    else
+      # TODO can do better than this
+      print("Error: no product with code: #{product_code}")
+    end
   end
 
-  def remove(x)
-    @basket[x] = @basket[x] - 1 if @basket[x] > 0
+  def remove(product_code)
+    if @purchases.key?(product_code)
+      if purchases[product_code] > 0
+        purchases[product_code] = purchases[product_code] - 1
+      else
+        print("Warning: no product with code #{product_code} in basket")
+      end
+    else
+      # TODO can do better than this
+      print("Error: no product with code: #{product_code}")
+    end
   end
 
-  def complete_purchase
-    running_price = basket_total
-    @basket = { "FR1" => 0,
-                "SR1" => 0,
-                "CF1" => 0,
-    }
-    return "That cost £#{running_price} and your basket is now empty"
-
-  end
-
-end
-
-def start_checkout
-  Basket.new
 end
