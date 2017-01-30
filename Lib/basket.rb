@@ -8,8 +8,18 @@ class Basket
     @catalogue.products_by_code.each_key { |p_code| @purchases[p_code] = 0 }
   end
 
-  def show_basket
-    # #{@basket} will call to_s method of Basket
+  def show
+    # #{@basket} will call to_s method of Basket - that's good for debugging, but not user friendly.
+    message_lines = Array.new
+    @purchases.each do |code, quantity|
+      if quantity > 0
+        product = @catalogue.products_by_code[code]
+        price = product.price * quantity
+        message_lines << checkout_line(product.name, quantity, price)
+      end
+    end
+    message_lines << total_line(total)
+    message_lines
   end
 
   def total
@@ -17,7 +27,7 @@ class Basket
     @purchases.each do |code, quantity|
       running_total = running_total + quantity * @catalogue.products_by_code[code].price
     end
-    return running_total
+    running_total
   end
 
   # give our parameter a descriptive name
@@ -25,9 +35,10 @@ class Basket
     # what if the user passes a non existant product code
     if @purchases.key?(product_code)
       @purchases[product_code] = @purchases[product_code] + 1
+      product = @catalogue.products_by_code[product_code]
+      return add_line(product.name, product.price)
     else
-      # TODO can do better than this
-      print("Error: no product with code: #{product_code}")
+      return "Error: no product with code: #{product_code}"
     end
   end
 
@@ -35,13 +46,44 @@ class Basket
     if @purchases.key?(product_code)
       if purchases[product_code] > 0
         purchases[product_code] = purchases[product_code] - 1
+        product = @catalogue.products_by_code[product_code]
+        return removed_line(product.name)
       else
-        print("Warning: no product with code #{product_code} in basket")
+        return "Warning: no product with code #{product_code} in basket"
       end
     else
-      # TODO can do better than this
-      print("Error: no product with code: #{product_code}")
+      return "Error: no product with code: #{product_code} in catalogue"
     end
+  end
+
+  private
+
+  def format_price(price_in_p)
+    price_in_pounds = price_in_p / 100.0
+    if price_in_p % 10 == 0
+      price_in_pounds.to_s + '0'
+    else
+      price_in_pounds.to_s
+    end
+  end
+
+  def checkout_line(name, quantity, price)
+    price_in_pounds = format_price(price)
+    "#{quantity} x #{name} £#{price_in_pounds}"
+  end
+
+  def add_line(name, price)
+    price_in_pounds = format_price(price)
+    "Added #{name} £#{price_in_pounds}"
+  end
+
+  def removed_line(name)
+    "Removed #{name}"
+  end
+
+  def total_line(total_pence)
+    total = format_price(total_pence)
+    "Total #{total}"
   end
 
 end
