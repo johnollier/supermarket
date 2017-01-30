@@ -1,24 +1,14 @@
 require 'basket'
 require 'catalogue'
+require 'mock_db'
 
-# here's a simple mock class, but for anything more complex use a mocking framework
-class MockDB
-  def execute(s)
-    # do nothing
-  end
-
-  def get_first_value(s)
-    nil
-  end
-end
-
-db = MockDB.new
+db = MockDb.new
 
 describe Basket do
   catalogue = Catalogue.new(db)
   describe '#initialize' do
     it "is empty initially" do
-      basket = Basket.new(catalogue)
+      basket = Basket.new(catalogue, [])
       # when testing methods test the data not a formatted message containing the data
       expect(basket.purchases['FR1']).to eq(0)
       expect(basket.purchases['SR1']).to eq(0)
@@ -27,14 +17,14 @@ describe Basket do
   end
   describe '#add' do
     it "can add a valid item" do
-      basket = Basket.new(catalogue)
+      basket = Basket.new(catalogue, [])
       basket.add("FR1")
       expect(basket.purchases['FR1']).to eq(1)
       expect(basket.purchases['SR1']).to eq(0)
       expect(basket.purchases['CF1']).to eq(0)
     end
     it "will not add an invalid item" do
-      basket = Basket.new(catalogue)
+      basket = Basket.new(catalogue, [])
       basket.add("ZZZ")
       expect(basket.purchases['FR1']).to eq(0)
       expect(basket.purchases['SR1']).to eq(0)
@@ -43,7 +33,7 @@ describe Basket do
   end
   describe '#remove' do
     it "can remove a valid item if present" do
-      basket = Basket.new(catalogue)
+      basket = Basket.new(catalogue, [])
       basket.add("FR1")
       basket.add("FR1")
       basket.remove("FR1")
@@ -52,7 +42,7 @@ describe Basket do
       expect(basket.purchases['CF1']).to eq(0)
     end
     it "will not remove an invalid item" do
-      basket = Basket.new(catalogue)
+      basket = Basket.new(catalogue, [])
       basket.remove("ZZZ")
       expect(basket.purchases['FR1']).to eq(0)
       expect(basket.purchases['SR1']).to eq(0)
@@ -61,11 +51,11 @@ describe Basket do
   end
   describe '#total' do
     it "will be zero initially" do
-      basket = Basket.new(catalogue)
+      basket = Basket.new(catalogue, [])
       expect(basket.total).to eq(0)
     end
     it "will calculate the running total" do
-      basket = Basket.new(catalogue)
+      basket = Basket.new(catalogue, [])
       basket.add("FR1")
       basket.add("FR1")
       basket.add("CF1")
@@ -74,7 +64,7 @@ describe Basket do
   end
   describe '#show' do
     it "will show product names and quantities" do
-      basket = Basket.new(catalogue)
+      basket = Basket.new(catalogue, [])
       basket.add("FR1")
       basket.add("FR1")
       basket.add("CF1")

@@ -1,5 +1,7 @@
 require './basket'
 require './catalogue'
+require './multiple_purchase_free_discount'
+require './multiple_purchase_reduced_price_discount'
 
 def print_message(lines)
   lines.each { |line| puts line }
@@ -13,7 +15,10 @@ begin
   finish = false
 
   catalogue = Catalogue.new(db)
-  basket = Basket.new(catalogue)
+  buy_fruit_tea_offer = MultiplePurchaseFreeDiscount.new(2, 'FR1')
+  reduced_price_strawbs_offer = MultiplePurchaseReducedPriceDiscount.new(3, 'SR1', 450)
+  discount_rules = [buy_fruit_tea_offer, reduced_price_strawbs_offer]
+  basket = Basket.new(catalogue, discount_rules)
 
   while !finish
     puts "Please enter command from: add [product code], remove [product_code], checkout"

@@ -1,11 +1,12 @@
 class Basket
   attr_reader :purchases
 
-  def initialize(catalogue)
+  def initialize(catalogue, discount_rules)
     # the class is called basket, lets think of a different descriptive name
     @purchases = Hash.new
     @catalogue = catalogue
     @catalogue.products_by_code.each_key { |p_code| @purchases[p_code] = 0 }
+    @discount_rules = discount_rules
   end
 
   def show
@@ -18,7 +19,16 @@ class Basket
         message_lines << checkout_line(product.name, quantity, price)
       end
     end
-    message_lines << total_line(total)
+    subtotal = total
+    message_lines << total_line(subtotal)
+    @discount_rules.each do |discount_rule|
+      discount = discount_rule.calculate_discount(@catalogue, @purchases)
+      if discount > 0
+        subtotal = subtotal - discount
+        message_lines << discount_rule.discount_line( format_price( discount ) )
+      end
+    end
+    message_lines << total_line(subtotal)
     message_lines
   end
 
